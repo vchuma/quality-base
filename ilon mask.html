@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Компоненты MSD - База Качества</title>
+    <style>
+        :root {
+            --dark-blue: #1A237E;
+            --light-gray: #F5F5F5;
+            --white: #FFFFFF;
+            --black: #000000;
+            --light-red: #FFEBEE;
+            --shadow-color: rgba(0,0,0,0.1);
+            --font-family: 'Roboto', sans-serif;
+            --text-color: var(--dark-blue);
+            --bg-color: var(--white);
+            --btn-bg-color: var(--dark-blue);
+            --btn-text-color: var(--white);
+            --input-bg-color: var(--light-gray);
+            --table-header-bg-color: var(--dark-blue);
+            --table-text-color: var(--dark-blue);
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-color);
+        }
+
+        .container {
+            width: 100%;
+            max-width: none;
+            background: var(--bg-color);
+            padding: 2rem;
+            box-shadow: 0 10px 20px var(--shadow-color);
+            margin: 1rem 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        h1 {
+            color: var(--text-color);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--input-bg-color);
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            transition: background-color 0.3s;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .qr-input-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        #qrCodeInput {
+            flex-grow: 1;
+        }
+
+        form input, form button {
+            padding: 0.5rem 0.75rem;
+            margin: 0;
+            border: 1px solid var(--text-color);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            background-color: var(--bg-color);
+            transition: all 0.3s ease;
+            color: var(--text-color);
+        }
+
+        form input:focus {
+            outline: none;
+            border-color: var(--btn-bg-color);
+            box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.3);
+        }
+
+        button {
+            background-color: var(--btn-bg-color);
+            color: var(--btn-text-color);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        button[type="submit"]:hover, button:hover {
+            background-color: #151C63;
+            color: var(--white);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            font-size: 0.7rem; /* Smaller font for table */
+        }
+
+        th, td {
+            border: 1px solid var(--input-bg-color);
+            padding: 0.3rem;
+            text-align: center;
+            color: var(--table-text-color);
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        th {
+            background-color: var(--table-header-bg-color);
+            color: var(--white);
+            font-weight: 600;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .edit, .delete, .history {
+            cursor: pointer;
+            font-size: 1.2em;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        .edit:hover, .delete:hover, .history:hover {
+            color: #151C63;
+        }
+
+        #editFormContainer {
+            display: none;
+        }
+
+        #editForm input {
+            background-color: var(--light-red);
+            border-color: var(--text-color);
+            transition: background-color 0.3s ease;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .modal-content {
+            background: var(--bg-color);
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 1000px; /* Увеличена ширина для истории */
+            max-height: 80%;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            text-align: center;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th, .history-table td {
+            border: 1px solid var(--input-bg-color);
+            padding: 0.3rem;
+            text-align: center;
+            color: var(--table-text-color);
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        .history-table th {
+            background: var(--input-bg-color);
+            transition: background-color 0.3s;
+        }
+
+        .modal-content form, .modal-content table {
+            margin: 0.5rem;
+        }
+
+        /* Night mode */
+        .night-mode {
+            --text-color: var(--white);
+            --bg-color: var(--black);
+            --btn-bg-color: #3F51B5;
+            --btn-text-color: var(--black);
+            --input-bg-color: #212121;
+            --table-header-bg-color: #3F51B5;
+            --table-text-color: var(--white);
+        }
+
+        #moscowTime {
+            transition: color 0.3s;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 24px;
+            margin: 0 5px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--btn-bg-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(16px);
+        }
+
+        .slider.round {
+            border-radius: 24px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        .switch-label {
+            font-size: 0.8rem;
+        }
+
+        .qr-code-column {
+            font-size: 0.6rem; /* Smaller font for QR code column */
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 <span id="moscowTime"></span></button>
+    <div class="container">
+        <h1>Компоненты MSD</h1>
+        
+        <form id="mainForm">
+            <div class="form-row">
+                <div class="qr-input-container">
+                    <input type="text" id="qrCodeInput" placeholder="QR код" oninput="updateFieldsFromQR()">
+                    <label class="switch">
+                        <input type="checkbox" id="qrAutoSwitch" onchange="toggleQRMode()">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="switch-label">Авто - Ручное</span>
+                    <button type="button" onclick="clearForm()">Стереть</button>
+                </div>
+            </div>
+            <div class="form-row">
+                <input type="text" id="sapInput" placeholder="SAP">
+                <input type="text" id="batchInput" placeholder="Партия">
+                <input type="text" id="reelIdInput" placeholder="ID катушки">
+                <input type="number" id="quantityInput" placeholder="Кол-во">
+                <input type="date" id="productionDateInput" placeholder="Дата пр-ва">
+                <input type="text" id="debitorInput" placeholder="Дебитор">
+            </div>
+            <div class="form-row">
+                <input type="text" placeholder="Заказчик">
+                <input type="text" placeholder="№ ячейки">
+                <input type="number" placeholder="Толщина компонента">
+                <input type="text" placeholder="Уровень MSL">
+                <input type="number" placeholder="Температура сушки, *С">
+                <input type="number" placeholder="Время сушки по JEDEC, часов">
+            </div>
+            <div class="form-row">
+                <input type="number" placeholder="Время сушки, суток">
+                <input type="text" placeholder="Примечание">
+                <button type="submit" style="flex-grow: 1;">Сохранить</button>
+                <button type="button" style="flex-grow: 1;">Отмена</button>
+                <!-- Empty inputs to maintain six columns -->
+                <input type="text" style="visibility: hidden;">
+                <input type="text" style="visibility: hidden;">
+            </div>
+        </form>
+
+        <div id="editFormContainer">
+            <form id="editForm" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem;">
+                <!-- Edit form will be dynamically populated with data -->
+            </form>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th class="qr-code-column">QR код</th>
+                    <th>Режим QR</th>
+                    <th>SAP</th>
+                    <th>Партия</th>
+                    <th>ID катушки</th>
+                    <th>Кол-во</th>
+                    <th>Дата пр-ва</th>
+                    <th>Дебитор</th>
+                    <th>Заказчик</th>
+                    <th>№ ячейки</th>
+                    <th>Толщина</th>
+                    <th>MSL</th>
+                    <th>Темп. сушки</th>
+                    <th>Время сушки JEDEC</th>
+                    <th>Время сушки</th>
+                    <th>Примечание</th>
+                    <th>Пользователь</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be dynamically added via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyAYTPezQ-WjLZ7WY3ZbpLJjkVezbxRxsDU",
+            authDomain: "quality-database-a7cfb.firebaseapp.com",
+            databaseURL: "https://quality-database-a7cfb-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "quality-database-a7cfb",
+            storageBucket: "quality-database-a7cfb.firebasestorage.app",
+            messagingSenderId: "1075321544960",
+            appId: "1:1075321544960:web:8e3cefc14aac9d99f353e5",
+            measurementId: "G-4NXVYT4Y77"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        const dbRef = firebase.database().ref('msd-components');
+
+        function renderTable(data) {
+            const tableBody = document.querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            const sortedData = Object.keys(data).sort((a, b) => 
+                new Date(data[b].date) - new Date(data[a].date)
+            );
+
+            sortedData.forEach(key => {
+                const row = data[key];
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formatDate(row.date)}</td>
+                    <td class="qr-code-column">${row.qrCode || 'n/a'}</td>
+                    <td>${row.qrMode}</td>
+                    <td>${row.sap || 'n/a'}</td>
+                    <td>${row.batch || 'n/a'}</td>
+                    <td>${row.reelId || 'n/a'}</td>
+                    <td>${row.quantity || 'n/a'}</td>
+                    <td>${formatDate(row.productionDate) || 'n/a'}</td>
+                    <td>${row.debitor || 'n/a'}</td>
+                    <td>${row.customer || 'n/a'}</td>
+                    <td>${row.cellNumber || 'n/a'}</td>
+                    <td>${row.componentThickness || 'n/a'}</td>
+                    <td>${row.mslLevel || 'n/a'}</td>
+                    <td>${row.dryingTemperature || 'n/a'}</td>
+                    <td>${row.jedecDryingTime || 'n/a'}</td>
+                    <td>${row.dryingTimeDays || 'n/a'}</td>
+                    <td>${row.note || 'n/a'}</td>
+                    <td>${row.user}</td>
+                    <td>
+                        <span class="edit" data-id="${key}">✏️</span>
+                        <span class="delete" data-id="${key}">🗑️</span>
+                        <span class="history" data-id="${key}">📜</span>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            document.querySelectorAll('.edit').forEach(editBtn => {
+                editBtn.addEventListener('click', handleEdit);
+            });
+            document.querySelectorAll('.delete').forEach(deleteBtn => {
+                deleteBtn.addEventListener('click', handleDelete);
+            });
+            document.querySelectorAll('.history').forEach(historyBtn => {
+                historyBtn.addEventListener('click', handleHistory);
+            });
+        }
+
+        function saveEntry(e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = {
+                date: new Date().toISOString(),
+                qrCode: document.getElementById('qrCodeInput').value || 'n/a',
+                qrMode: document.getElementById('qrAutoSwitch').checked ? 'Авто' : 'Ручной',
+                sap: document.getElementById('sapInput').value || 'n/a',
+                batch: document.getElementById('batchInput').value || 'n/a',
+                reelId: document.getElementById('reelIdInput').value || 'n/a',
+                quantity: document.getElementById('quantityInput').value || 'n/a',
+                productionDate: document.getElementById('productionDateInput').value || 'n/a',
+                debitor: document.getElementById('debitorInput').value || 'n/a',
+                customer: form.querySelector('[placeholder="Заказчик"]').value || 'n/a',
+                cellNumber: form.querySelector('[placeholder="№ ячейки"]').value || 'n/a',
+                componentThickness: form.querySelector('[placeholder="Толщина компонента"]').value || 'n/a',
+                mslLevel: form.querySelector('[placeholder="Уровень MSL"]').value || 'n/a',
+                dryingTemperature: form.querySelector('[placeholder="Температура сушки, *С"]').value || 'n/a',
+                jedecDryingTime: form.querySelector('[placeholder="Время сушки по JEDEC, часов"]').value || 'n/a',
+                dryingTimeDays: form.querySelector('[placeholder="Время сушки, суток"]').value || 'n/a',
+                note: form.querySelector('[placeholder="Примечание"]').value || 'n/a',
+                user: firebase.auth().currentUser ? firebase.auth().currentUser.email : "Anonymous",
+                history: []
+            };
+
+            dbRef.push(data).then(() => {
+                form.reset();
+                document.getElementById('qrAutoSwitch').checked = false; // Reset switch
+                dbRef.once('value').then(snapshot => {
+                    renderTable(snapshot.val());
+                });
+            }).catch(error => {
+                console.error("Ошибка при сохранении данных:", error);
+            });
+        }
+
+        document.getElementById('mainForm').addEventListener('submit', saveEntry);
+
+        function handleEdit(e) {
+            const id = e.target.dataset.id;
+            dbRef.child(id).once('value').then(snapshot => {
+                const data = snapshot.val();
+                showEditForm(id, data);
+            });
+        }
+
+        function showEditForm(id, data) {
+            document.getElementById('editFormContainer').style.display = 'block';
+            document.getElementById('mainForm').style.display = 'none';
+
+            // Dynamically create and populate edit form
+            const editForm = document.getElementById('editForm');
+            editForm.innerHTML = '';
+            
+            const qrContainer = document.createElement('div');
+            qrContainer.className = 'form-row';
+            const qrInput = document.createElement('input');
+            qrInput.id = 'editQrCodeInput';
+            qrInput.type = 'text';
+            qrInput.placeholder = 'QR код';
+            qrInput.value = data.qrCode || '';
+            qrInput.oninput = updateFieldsFromQR;
+            
+            const switchLabel = document.createElement('label');
+            switchLabel.className = 'switch';
+            
+            const switchInput = document.createElement('input');
+            switchInput.type = 'checkbox';
+            switchInput.id = 'editQrModeSwitch';
+            switchInput.checked = data.qrMode === 'Авто';
+            switchInput.onchange = toggleQRMode;
+            
+            const slider = document.createElement('span');
+            slider.className = 'slider round';
+            
+            switchLabel.appendChild(switchInput);
+            switchLabel.appendChild(slider);
+            
+            const modeLabel = document.createElement('span');
+            modeLabel.className = 'switch-label';
+            modeLabel.textContent = 'Авто - Ручное';
+            
+            qrContainer.appendChild(qrInput);
+            qrContainer.appendChild(switchLabel);
+            qrContainer.appendChild(modeLabel);
+            editForm.appendChild(qrContainer);
+
+            const inputFields = [
+                {id: 'sap', placeholder: 'SAP'},
+                {id: 'batch', placeholder: 'Партия'},
+                {id: 'reelId', placeholder: 'ID катушки'},
+                {id: 'quantity', placeholder: 'Кол-во', type: 'number'},
+                {id: 'productionDate', placeholder: 'Дата пр-ва', type: 'date'},
+                {id: 'debitor', placeholder: 'Дебитор'},
+                {id: 'customer', placeholder: 'Заказчик'},
+                {id: 'cellNumber', placeholder: '№ ячейки'},
+                {id: 'componentThickness', placeholder: 'Толщина компонента', type: 'number'},
+                {id: 'mslLevel', placeholder: 'Уровень MSL'},
+                {id: 'dryingTemperature', placeholder: 'Температура сушки, *С', type: 'number'},
+                {id: 'jedecDryingTime', placeholder: 'Время сушки по JEDEC, часов', type: 'number'},
+                {id: 'dryingTimeDays', placeholder: 'Время сушки, суток', type: 'number'},
+                {id: 'note', placeholder: 'Примечание'}
+            ];
+
+            let currentRow = document.createElement('div');
+            currentRow.className = 'form-row';
+            inputFields.forEach((field, index) => {
+                if (index > 0 && index % 6 === 0) {
+                    editForm.appendChild(currentRow);
+                    currentRow = document.createElement('div');
+                    currentRow.className = 'form-row';
+                }
+                const input = document.createElement('input');
+                input.id = `edit${field.id.charAt(0).toUpperCase() + field.id.slice(1)}`;
+                input.type = field.type || 'text';
+                input.placeholder = field.placeholder;
+                input.value = data[field.id] || '';
+                currentRow.appendChild(input);
+            });
+            editForm.appendChild(currentRow);
+
+            const buttonRow = document.createElement('div');
+            buttonRow.className = 'form-row';
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Сохранить изменения';
+            saveBtn.type = 'submit';
+            buttonRow.appendChild(saveBtn);
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Отмена';
+            cancelBtn.type = 'button';
+            cancelBtn.addEventListener('click', cancelEdit);
+            buttonRow.appendChild(cancelBtn);
+            editForm.appendChild(buttonRow);
+
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveEdit(id, this);
+                this.removeEventListener('submit', arguments.callee);
+            });
+
+            toggleQRMode(); // Apply the QR mode to the edit form
+        }
+
+        function saveEdit(id, form) {
+            const updatedData = {};
+            [...form.elements].forEach(el => {
+                if (el.type !== 'submit' && el.type !== 'button' && el.id.startsWith('edit')) {
+                    if (el.id === "editQrMode                    if (el.id === "editQrModeSwitch") {
+                        updatedData['qrMode'] = el.checked ? 'Авто' : 'Ручной';
+                    } else {
+                        updatedData[el.id.slice(4).toLowerCase()] = el.value || 'n/a';
+                    }
+                }
+            });
+
+            if (updatedData.qrMode === 'Авто' || updatedData.qrCode !== 'n/a') {
+                parseQRCode(updatedData.qrCode, updatedData);
+            }
+
+            dbRef.child(id).once('value').then(snapshot => {
+                const currentData = snapshot.val();
+                const historyEntry = {
+                    date: new Date().toISOString(),
+                    change: `Изменено: ${JSON.stringify(updatedData)}`
+                };
+
+                if (!currentData.history) {
+                    currentData.history = [];
+                }
+                currentData.history.push(historyEntry);
+
+                const dataToUpdate = {...currentData, ...updatedData, date: currentData.date};
+
+                dbRef.child(id).update(dataToUpdate).then(() => {
+                    cancelEdit();
+                    dbRef.once('value').then(snapshot => {
+                        renderTable(snapshot.val());
+                    });
+                }).catch(error => {
+                    console.error("Ошибка при обновлении данных:", error);
+                });
+            });
+        }
+
+        function handleDelete(e) {
+            const id = e.target.dataset.id;
+            showDeleteConfirmation(id);
+        }
+
+        function showDeleteConfirmation(id) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            const content = document.createElement('div');
+            content.className = 'modal-content';
+            content.style.padding = '2rem';
+            content.innerHTML = `
+                <h3>Удалить запись?</h3>
+                <form style="display: flex; flex-direction: row; justify-content: space-around;">
+                    <button class="confirm-delete" data-id="${id}">Да, удалить</button>
+                    <button class="cancel-delete">Отмена</button>
+                </form>
+            `;
+
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+
+            content.querySelector('.confirm-delete').addEventListener('click', function() {
+                confirmDelete(this.getAttribute('data-id'), modal);
+            });
+            content.querySelector('.cancel-delete').addEventListener('click', function() {
+                cancelDelete(modal);
+            });
+
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    cancelDelete(modal);
+                }
+            });
+        }
+
+        function confirmDelete(id, modal) {
+            dbRef.child(id).remove().then(() => {
+                modal.remove();
+                console.log("Запись успешно удалена.");
+                dbRef.once('value').then(snapshot => {
+                    renderTable(snapshot.val());
+                });
+            }).catch(error => {
+                console.error("Ошибка при удалении данных:", error);
+                alert("Не удалось удалить запись. Ошибка: " + error.message);
+            });
+        }
+
+        function cancelDelete(modal) {
+            modal.remove();
+        }
+
+        function cancelEdit() {
+            document.getElementById('editFormContainer').style.display = 'none';
+            document.getElementById('mainForm').style.display = 'flex';
+            document.getElementById('editForm').innerHTML = ''; // Clear the edit form
+        }
+
+        function handleHistory(e) {
+            const id = e.target.dataset.id;
+            dbRef.child(id).once('value').then(snapshot => {
+                const historyData = snapshot.val() || {};
+                showHistoryModal(id, historyData);
+            });
+        }
+
+        function showHistoryModal(id, historyData) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            const content = document.createElement('div');
+            content.className = 'modal-content';
+
+            let historyHTML = '<table class="history-table"><thead><tr><th>Дата</th><th>Пользователь</th><th>Изменения</th></tr></thead><tbody>';
+            if (historyData.history && historyData.history.length > 0) {
+                historyData.history.forEach(entry => {
+                    const changes = JSON.parse(entry.change.split('Изменено: ')[1]);
+                    const changesList = Object.entries(changes).map(([key, value]) => 
+                        `<li style="color: ${value !== historyData[key] ? 'red' : 'inherit'}">${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}</li>`
+                    ).join('');
+                    historyHTML += `<tr><td>${formatDate(entry.date)}</td><td>${historyData.user || "Неизвестно"}</td><td><ul style="text-align: left;">${changesList}</ul></td></tr>`;
+                });
+            } else {
+                historyHTML += '<tr><td colspan="3">Изменений не найдено.</td></tr>';
+            }
+            historyHTML += '</tbody></table>';
+
+            content.innerHTML = `<h3>История изменений</h3>${historyHTML}`;
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('night-mode');
+            const themeToggle = document.querySelector('.theme-toggle');
+            themeToggle.textContent = document.body.classList.contains('night-mode') ? '☀️' : '🌙';
+            
+            // Update the color of the time text based on the current theme
+            const timeElement = document.getElementById('moscowTime');
+            timeElement.style.color = document.body.classList.contains('night-mode') ? 'white' : 'var(--dark-blue)';
+            
+            updateMoscowTime(); // Update time after theme change
+        }
+
+        function updateMoscowTime() {
+            const now = new Date();
+            now.setHours(now.getHours() + 3); // Москва UTC+3
+            const options = { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: false
+            };
+            const moscowTime = now.toLocaleDateString('ru-RU', options) + ' ' + now.toLocaleTimeString('ru-RU', options).replace(',', '');
+            document.getElementById('moscowTime').textContent = ` ${moscowTime}`;
+        }
+
+        // Update the time every second
+        setInterval(updateMoscowTime, 1000);
+
+        // Initial call to set the time immediately on page load
+        updateMoscowTime();
+
+        function toggleQRMode() {
+            const qrAutoSwitch = document.getElementById('qrAutoSwitch') || document.getElementById('editQrModeSwitch');
+            const mode = qrAutoSwitch.checked ? 'Авто' : 'Ручной';
+            
+            // Enable or disable fields based on QR mode
+            const fieldsToDisable = ['sapInput', 'batchInput', 'reelIdInput', 'quantityInput', 'productionDateInput', 'debitorInput'];
+            fieldsToDisable.forEach(id => {
+                const field = document.getElementById(id) || document.getElementById('edit' + id.charAt(0).toUpperCase() + id.slice(1));
+                if (field) {
+                    field.disabled = mode === 'Авто';
+                }
+            });
+            
+            if (mode === 'Авто') {
+                const qrCodeInput = document.getElementById('qrCodeInput') || document.getElementById('editQrCodeInput');
+                parseQRCode(qrCodeInput.value);
+            }
+        }
+
+        function parseQRCode(qrCode, data = {}) {
+            if (!qrCode || qrCode === 'n/a') return;
+
+            const parts = qrCode.match(/P(\d{7})L(\d{10})R(\d{10})Q(\d{5})D(\d{8})/);
+            if (parts) {
+                data.sap = parts[1];
+                data.batch = parts[2];
+                data.reelId = parts[3];
+                data.quantity = parts[4];
+                data.productionDate = `${parts[5].slice(0, 4)}-${parts[5].slice(4, 6)}-${parts[5].slice(6)}`;
+                data.debitor = parts[2]; // Assuming debitor is the same as batch here
+
+                if (document.getElementById('mainForm').style.display !== 'none') {
+                    document.getElementById('sapInput').value = data.sap;
+                    document.getElementById('batchInput').value = data.batch;
+                    document.getElementById('reelIdInput').value = data.reelId;
+                    document.getElementById('quantityInput').value = data.quantity;
+                    document.getElementById('productionDateInput').value = data.productionDate;
+                    document.getElementById('debitorInput').value = data.debitor;
+                } else {
+                    document.getElementById('editSap').value = data.sap;
+                    document.getElementById('editBatch').value = data.batch;
+                    document.getElementById('editReelId').value = data.reelId;
+                    document.getElementById('editQuantity').value = data.quantity;
+                    document.getElementById('editProductionDate').value = data.productionDate;
+                    document.getElementById('editDebitor').value = data.debitor;
+                }
+            }
+        }
+
+        function updateFieldsFromQR() {
+            const qrCode = document.getElementById('qrCodeInput').value || document.getElementById('editQrCodeInput').value;
+            parseQRCode(qrCode);
+        }
+
+        function clearForm() {
+            document.getElementById('mainForm').reset();
+            document.getElementById('qrAutoSwitch').checked = false; // Reset the switch
+            toggleQRMode(); // Disable fields if in Auto mode
+        }
+
+        dbRef.once('value').then(snapshot => {
+            renderTable(snapshot.val());
+        });
+
+        function formatDate(date) {
+            if (!date || date === 'n/a') return 'n/a';
+            const d = new Date(date);
+            return d.toLocaleString('ru-RU', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(',', '');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Динамическая таблица</title>
+    <style>
+        /* Стили для контейнера */
+        .table-container {
+            width: 100%;
+            overflow-x: auto; /* Горизонтальная прокрутка для узких экранов */
+            margin: 0 auto;
+        }
+
+        /* Стили для таблицы */
+        .responsive-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* Автоматическое распределение ширины столбцов */
+            text-align: left;
+            font-size: 0.8vw; /* Размер шрифта теперь меньше */
+        }
+
+        .responsive-table th, 
+        .responsive-table td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            word-wrap: break-word; /* Перенос текста в ячейках, если он не помещается */
+            text-align: center; /* Центрируем текст */
+        }
+
+        /* Стили для заголовков */
+        .responsive-table th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        /* Адаптивность для небольших экранов */
+        @media (max-width: 768px) {
+            .responsive-table {
+                font-size: 3.5vw; /* Уменьшаем размер шрифта для мобильных экранов */
+            }
+
+            .responsive-table th, 
+            .responsive-table td {
+                padding: 6px 10px; /* Уменьшаем padding */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="table-container">
+        <table class="responsive-table">
+            <thead>
+                <tr>
+                    <th>Заголовок 1</th>
+                    <th>Заголовок 2</th>
+                    <th>Заголовок 3</th>
+                    <th>Заголовок 4</th>
+                    <th>Заголовок 5</th>
+                    <th>Заголовок 6</th>
+                    <th>Заголовок 7</th>
+                    <th>Заголовок 8</th>
+                    <th>Заголовок 9</th>
+                    <th>Заголовок 10</th>
+                    <th>Заголовок 11</th>
+                    <th>Заголовок 12</th>
+                    <th>Заголовок 13</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Данные 1</td>
+                    <td>Данные 2</td>
+                    <td>Данные 3</td>
+                    <td>Данные 4</td>
+                    <td>Данные 5</td>
+                    <td>Данные 6</td>
+                    <td>Данные 7</td>
+                    <td>Данные 8</td>
+                    <td>Данные 9</td>
+                    <td>Данные 10</td>
+                    <td>Данные 11</td>
+                    <td>Данные 12</td>
+                    <td>Данные 13</td>
+                </tr>
+                <tr>
+                    <td>Данные 14</td>
+                    <td>Данные 15</td>
+                    <td>Данные 16</td>
+                    <td>Данные 17</td>
+                    <td>Данные 18</td>
+                    <td>Данные 19</td>
+                    <td>Данные 20</td>
+                    <td>Данные 21</td>
+                    <td>Данные 22</td>
+                    <td>Данные 23</td>
+                    <td>Данные 24</td>
+                    <td>Данные 25</td>
+                    <td>Данные 26</td>
+                </tr>
+                <tr>
+                    <td>Данные 27</td>
+                    <td>Данные 28</td>
+                    <td>Данные 29</td>
+                    <td>Данные 30</td>
+                    <td>Данные 31</td>
+                    <td>Данные 32</td>
+                    <td>Данные 33</td>
+                    <td>Данные 34</td>
+                    <td>Данные 35</td>
+                    <td>Данные 36</td>
+                    <td>Данные 37</td>
+                    <td>Данные 38</td>
+                    <td>Данные 39</td>
+                </tr>
+                <tr>
+                    <td>Данные 40</td>
+                    <td>Данные 41</td>
+                    <td>Данные 42</td>
+                    <td>Данные 43</td>
+                    <td>Данные 44</td>
+                    <td>Данные 45</td>
+                    <td>Данные 46</td>
+                    <td>Данные 47</td>
+                    <td>Данные 48</td>
+                    <td>Данные 49</td>
+                    <td>Данные 50</td>
+                    <td>Данные 51</td>
+                    <td>Данные 52</td>
+                </tr>
+                <tr>
+                    <td>Данные 53</td>
+                    <td>Данные 54</td>
+                    <td>Данные 55</td>
+                    <td>Данные 56</td>
+                    <td>Данные 57</td>
+                    <td>Данные 58</td>
+                    <td>Данные 59</td>
+                    <td>Данные 60</td>
+                    <td>Данные 61</td>
+                    <td>Данные 62</td>
+                    <td>Данные 63</td>
+                    <td>Данные 64</td>
+                    <td>Данные 65</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Пример добавления строки динамически
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.querySelector('.responsive-table tbody');
+            
+            // Создаем новую строку с данными
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>Новые данные 66</td>
+                <td>Новые данные 67</td>
+                <td>Новые данные 68</td>
+                <td>Новые данные 69</td>
+                <td>Новые данные 70</td>
+                <td>Новые данные 71</td>
+                <td>Новые данные 72</td>
+                <td>Новые данные 73</td>
+                <td>Новые данные 74</td>
+                <td>Новые данные 75</td>
+                <td>Новые данные 76</td>
+                <td>Новые данные 77</td>
+                <td>Новые данные 78</td>
+            `;
+            // Добавляем строку в таблицу
+            tableBody.appendChild(newRow);
+        });
+    </script>
+</body>
+</html>
